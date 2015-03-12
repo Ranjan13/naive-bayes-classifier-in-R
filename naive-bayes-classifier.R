@@ -28,8 +28,6 @@ for(i in 1:nclass) {
   for(i in 1:length(lst)) {
   rownames(lst[[i]]) = classes
 }
-  cat("\nCalculated Statistics:","\n\n")
-#  print(lst)
   probability_calc (classes, test_data, tdata, lst, lastCol)
 }
 ###############################################################################
@@ -37,9 +35,10 @@ for(i in 1:nclass) {
 probability_calc <- function(classes, vtest, tdata, lst, lastCol ) {
 max.ind <- 0
 cal.label = c( )
-print("Test SET::")
 vtest_label = as.vector(vtest[ ,ncol(vtest)])
 vtest = vtest[ ,-ncol(vtest)]
+
+ptm <- proc.time()#Timer Starts
 
 for(i in 1:nrow(vtest)) {
   prob <- c()
@@ -52,15 +51,11 @@ for(i in 1:nrow(vtest)) {
 	P = count_c/length (tdata[ ,lastCol])
 	for(val in test.inst) {
 		val_v = as.vector (as.matrix (val))
-		cat("\nval_v : ", val_v,"\n")
 		ind = which (val_v == test.inst)
 		for(indo in ind) {
-		cat("Indexes: ",indo,"\n")
 		cname = colnames (test.inst[indo])
-		cat("Col names: ",cname,"\n")
 		p_ai <- p_ai *((lst[[cname]][c, val_v])/count_c) 
 		}
-		print(p_ai)
 	}
 	P = prod(P,p_ai)
 	prob = c(prob, P)
@@ -70,9 +65,8 @@ for(i in 1:nrow(vtest)) {
   max.ind <- max.ind[1]
   cal.label = c(cal.label, classes[max.ind])
 }
-#cat ("\nCalculated Label : ",cal.label,"\n")
-#cat ("\nTest label : ",vtest_label,"\n")
-	error_cal(cal.label,vtest_label)
+  proc.time() - ptm
+  error_cal(cal.label,vtest_label)
 }
 
 ###############################################################################
@@ -82,11 +76,11 @@ for(i in 1:nrow(vtest)) {
 error_cal <- function(cal_lbl,test_lbl) {
 	len_cal_lbl=length(cal_lbl)
 	len_test_lbl=length(test_lbl)
-	match_count=0;
+	match_count=0
 	if(len_cal_lbl == len_test_lbl) {
 	 for(i in 1:len_cal_lbl) {
 	  if( cal_lbl[i] == test_lbl[i]) {
-		 match_count = match_count + 1;
+		 match_count = match_count + 1
 		}
 	     error_per <- (match_count / len_cal_lbl) * 100
 	   }
@@ -94,7 +88,7 @@ error_cal <- function(cal_lbl,test_lbl) {
           cat("\nError::Label Not Matched\n\n")
 	  quit()
 	}
-	cat("\n\n Accuracy  :",error_per,"%","\n\n")
+	cat(error_per,"\n")
 }
 
 
@@ -109,7 +103,6 @@ preprocess <- function(){
 	if(length(args)!=3){
 	cat("\n Command Line Arguement Error \n")
 	cat("\nRscript <prog_name.R> <InputDataset> <1>(header=TRUE) <1>(row.numbering = TRUE)  \n\n ")
-	
 	quit()
 	}
 	input<-args[1]
@@ -123,16 +116,10 @@ preprocess <- function(){
 #Pass Arguement 3 as 1 if rowname exists in the dataset
 	if(args[3] == 1){
 		dataset = dataset[ ,-1]
-	}	
+	}
 	train_index = sample(1:nrow(dataset),size = 0.75*nrow(dataset))
 	train_data = dataset[train_index, ]
-	
-	cat("\n75% Trainning Data::","\n")
-
 	test_data = dataset[-train_index, ]
-
-        cat("\n\n25% Test Data::","\n\n")
-
   	metric_calc(train_data, test_data)
         }
 
